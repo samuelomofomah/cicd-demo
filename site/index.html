@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pipeline Demo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Live site</p>
+
+    <!-- CHANGE THIS LINE to demo the pipeline. Save, push, and watch it go live. -->
+    <h1>Hello from the pipeline</h1>
+
+    <p class="lede">
+      Nobody uploaded this page by hand. A change was saved, a robot checked it,
+      and the same robot published it.
+    </p>
+
+    <dl class="release">
+      <div>
+        <dt>Release</dt>
+        <dd>#__BUILD_NUMBER__</dd>
+      </div>
+      <div>
+        <dt>Change ID</dt>
+        <dd>__COMMIT_SHA__</dd>
+      </div>
+      <div>
+        <dt>Published</dt>
+        <dd>__BUILT_AT__</dd>
+      </div>
+    </dl>
+  </main>
+</body>
+</html>

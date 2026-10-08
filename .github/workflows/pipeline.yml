@@ -1,0 +1,57 @@
+# The pipeline: the written instructions GitHub follows every time the code changes.
+name: Test and deploy
+
+# WHEN it runs
+on:
+  push:
+    branches: [main]      # a change lands on the main copy -> test it, then publish it
+  pull_request:           # someone proposes a change -> test it only, never publish
+  workflow_dispatch:      # a "Run workflow" button, for running it by hand
+
+# By default the robot may only READ the code. Extra rights are granted per job below.
+permissions:
+  contents: read
+
+jobs:
+  # ---- CI: Continuous Integration ------------------------------------------
+  test:
+    name: Build and check
+    runs-on: ubuntu-latest          # a brand-new rented computer, thrown away afterwards
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v7
+
+      - name: Build the site
+        run: bash build.sh
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+          COMMIT_SHA: ${{ github.sha }}
+
+      - name: Run the quality checks
+        run: bash tests/check.sh dist
+
+      - name: Box up the approved build
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  # ---- CD: Continuous Deployment -------------------------------------------
+  deploy:
+    name: Publish to the live site
+    needs: test                     # only starts if every check above passed
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write                  # allowed to publish the website...
+      id-token: write               # ...and to prove to GitHub Pages who is asking
+    concurrency:
+      group: pages                  # one release at a time, in order
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish
+        id: deployment
+        uses: actions/deploy-pages@v5
